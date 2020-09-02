@@ -57,6 +57,9 @@ dependencies {
     // Text features
     implementation 'com.google.android.gms:play-services-mlkit-text-recognition:16.1.0'
 
+    // List
+    implementation "androidx.recyclerview:recyclerview:1.1.0"
+
     // Image labeling with automl model support
     implementation 'com.google.mlkit:image-labeling-automl:16.2.0'
 

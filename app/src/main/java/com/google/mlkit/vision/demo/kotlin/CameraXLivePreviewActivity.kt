@@ -20,19 +20,15 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.CameraInfoUnavailableException
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageProxy
-import androidx.camera.core.Preview
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
@@ -41,13 +37,17 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.common.annotation.KeepName
 import com.google.mlkit.common.MlKitException
-import com.google.mlkit.vision.demo.*
+import com.google.mlkit.vision.demo.CameraXViewModel
+import com.google.mlkit.vision.demo.GraphicOverlay
+import com.google.mlkit.vision.demo.R
+import com.google.mlkit.vision.demo.VisionImageProcessor
 import com.google.mlkit.vision.demo.kotlin.facedetector.FaceDetectorProcessor
 import com.google.mlkit.vision.demo.preference.PreferenceUtils
 import com.google.mlkit.vision.demo.preference.SettingsActivity
 import com.google.mlkit.vision.demo.preference.SettingsActivity.LaunchSource
-import com.google.mlkit.vision.face.Face
-import java.util.ArrayList
+import java.io.ByteArrayOutputStream
+import java.io.FileOutputStream
+import java.util.*
 
 /** Live preview demo app for ML Kit APIs using CameraX.  */
 @KeepName
@@ -96,9 +96,21 @@ class CameraXLivePreviewActivity :
         }
 
         capture?.setOnClickListener {
-            getFaces().firstOrNull()?.let {
-                BitmapUtils.cropBitmap(getBitmap(), it.boundingBox)
+            if (getFaces().isEmpty() || getBitmap() == null) {
+                Toast.makeText(applicationContext, "No face detected!!", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
             }
+
+            val intent = Intent(applicationContext, FacesActivity::class.java)
+            intent.putExtra(
+                    "IMAGE_TAG",
+                    saveBitmap(getBitmap()!!)
+            )
+            intent.putExtra(
+                    "FACE_LIST_TAG",
+                    ArrayList(getFaces().map { it.boundingBox })
+            )
+            startActivity(intent)
         }
 
         val facingSwitch =
@@ -133,6 +145,23 @@ class CameraXLivePreviewActivity :
             runtimePermissions
         }
     }
+
+    fun saveBitmap(bitmap: Bitmap): String? {
+        var fileName: String? = "image_with_faces" //no .png or .jpg needed
+        try {
+            val bytes = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+            val fo: FileOutputStream = openFileOutput(fileName, Context.MODE_PRIVATE)
+            fo.write(bytes.toByteArray())
+            // remember close file output
+            fo.close()
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+            fileName = null
+        }
+        return fileName
+    }
+
 
     override fun onSaveInstanceState(bundle: Bundle) {
         super.onSaveInstanceState(bundle)
