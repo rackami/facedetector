@@ -85,6 +85,9 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
     @GuardedBy("this")
     private var processingMetaData: FrameMetadata? = null
 
+    // Used for saving the current bitmap in the camera and then get the faces from it....
+    var globalBitmap: Bitmap? = null
+
     init {
         fpsTimer.scheduleAtFixedRate(
                 object : TimerTask() {
@@ -160,6 +163,7 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
         if (!PreferenceUtils.isCameraLiveViewportEnabled(graphicOverlay.context)) {
             bitmap = BitmapUtils.getBitmap(image)
         }
+        globalBitmap = bitmap
         requestDetectInImage(
                 InputImage.fromMediaImage(image.image!!, image.imageInfo.rotationDegrees),
                 graphicOverlay, /* originalCameraImage= */

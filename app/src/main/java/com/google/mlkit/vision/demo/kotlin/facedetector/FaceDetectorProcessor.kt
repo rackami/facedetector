@@ -38,9 +38,8 @@ import kotlin.math.log
 class FaceDetectorProcessor(context: Context, detectorOptions: FaceDetectorOptions?) :
   VisionProcessorBase<List<Face>>(context) {
 
-  var imageBitmap: Bitmap? = null
   private val detector: FaceDetector
-  var faces = mutableMapOf<String, Bitmap>()
+  var faces = listOf<Face>()
 
   init {
     val options = detectorOptions
@@ -60,21 +59,14 @@ class FaceDetectorProcessor(context: Context, detectorOptions: FaceDetectorOptio
   }
 
   override fun detectInImage(image: InputImage): Task<List<Face>> {
-
-    imageBitmap = image.bitmapInternal
-
-    // image bitmap rachid
     return detector.process(image)
   }
 
   override fun onSuccess(faces: List<Face>, graphicOverlay: GraphicOverlay) {
-    val newFaces = mutableMapOf<String, Bitmap>()
     for (face in faces) {
-      newFaces[face.trackingId.toString()] = BitmapUtils.cropBitmap(imageBitmap, face.boundingBox)
       graphicOverlay.add(FaceGraphic(graphicOverlay, face))
-//      logExtrasForTesting(face)
     }
-    this.faces = newFaces
+    this.faces = faces
   }
 
   override fun onFailure(e: Exception) {

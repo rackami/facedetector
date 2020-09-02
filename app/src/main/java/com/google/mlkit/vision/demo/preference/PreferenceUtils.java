@@ -107,6 +107,6 @@ public class PreferenceUtils {
     }
 
     public static boolean isCameraLiveViewportEnabled(Context context) {
-        return true;
+        return false;
     }
 }

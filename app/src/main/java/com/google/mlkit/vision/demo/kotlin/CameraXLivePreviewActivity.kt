@@ -26,10 +26,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
-import android.widget.CompoundButton
-import android.widget.ImageView
-import android.widget.Toast
-import android.widget.ToggleButton
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraInfoUnavailableException
 import androidx.camera.core.CameraSelector
@@ -44,10 +41,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.common.annotation.KeepName
 import com.google.mlkit.common.MlKitException
-import com.google.mlkit.vision.demo.CameraXViewModel
-import com.google.mlkit.vision.demo.GraphicOverlay
-import com.google.mlkit.vision.demo.R
-import com.google.mlkit.vision.demo.VisionImageProcessor
+import com.google.mlkit.vision.demo.*
 import com.google.mlkit.vision.demo.kotlin.facedetector.FaceDetectorProcessor
 import com.google.mlkit.vision.demo.preference.PreferenceUtils
 import com.google.mlkit.vision.demo.preference.SettingsActivity
@@ -64,6 +58,7 @@ class CameraXLivePreviewActivity :
 
     private var previewView: PreviewView? = null
     private var graphicOverlay: GraphicOverlay? = null
+    private var capture: Button? = null
     private var cameraProvider: ProcessCameraProvider? = null
     private var previewUseCase: Preview? = null
     private var analysisUseCase: ImageAnalysis? = null
@@ -72,7 +67,9 @@ class CameraXLivePreviewActivity :
     private var lensFacing = CameraSelector.LENS_FACING_BACK
     private var cameraSelector: CameraSelector? = null
 
-    fun getFaces() = (imageProcessor as? FaceDetectorProcessor)?.faces ?: mutableMapOf()
+    fun getFaces() = (imageProcessor as? FaceDetectorProcessor)?.faces ?: listOf()
+
+    fun getBitmap() = (imageProcessor as? FaceDetectorProcessor)?.globalBitmap
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,6 +85,7 @@ class CameraXLivePreviewActivity :
         cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
         setContentView(R.layout.activity_vision_camerax_live_preview)
         previewView = findViewById(R.id.preview_view)
+        capture = findViewById(R.id.capture)
 
         if (previewView == null) {
             Log.d(TAG, "previewView is null")
@@ -97,29 +95,11 @@ class CameraXLivePreviewActivity :
             Log.d(TAG, "graphicOverlay is null")
         }
 
-        graphicOverlay?.setOnTouchListener { v, event ->
-            if (event.action == MotionEvent.ACTION_DOWN) {
-                Log.d(TAG, "rachid - onSuccess: " + getFaces().toString())
-//                Log.d(TAG, "rachid - onSuccess: " + event.x.toInt() + " - " + event.y.toInt())
-//                getFaces().firstOrNull {
-//                    it.boundingBox.contains(event.x.toInt(), event.y.toInt())
-//                }?.let {
-
-//                }
-//                getFaces().firstOrNull()?.let {
-//                    // Mehdi - dir chi 7aja hna
-//                    Toast.makeText(applicationContext, "Mehdi, chof chno dir hna!!", Toast.LENGTH_SHORT).show()
-//                }
-
+        capture?.setOnClickListener {
+            getFaces().firstOrNull()?.let {
+                BitmapUtils.cropBitmap(getBitmap(), it.boundingBox)
             }
-            true
         }
-
-
-        //    graphicOverlay.setOnTouchListener { v, event ->
-        //      Log.d(TAG, "rachid - onSuccess: " + MotionEvent.actionToString(event.action))
-        //      false
-        //    }
 
         val facingSwitch =
                 findViewById<ToggleButton>(R.id.facing_switch)
