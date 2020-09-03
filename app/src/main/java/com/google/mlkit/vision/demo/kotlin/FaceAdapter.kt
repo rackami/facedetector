@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.mlkit.vision.demo.ApiService
 import com.google.mlkit.vision.demo.BitmapUtils
 import com.google.mlkit.vision.demo.R
 
@@ -37,7 +38,7 @@ class FaceAdapter(private val rootImage: Bitmap?, private val faces: ArrayList<R
         holder.rootView.findViewById<Button>(R.id.save).setOnClickListener {
             val requestBitmap = bitmap
             val requestFaceDescription = holder.rootView.findViewById<EditText>(R.id.description).text
-            // MEHDII dir dakchi li bghiti dir hna
+            ApiService.saveFaceWithName(requestBitmap, requestFaceDescription.toString())
         }
     }
 
