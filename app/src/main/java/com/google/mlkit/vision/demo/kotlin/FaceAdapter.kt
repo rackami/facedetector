@@ -38,7 +38,6 @@ class FaceAdapter(private val rootImage: Bitmap?, private val faces: ArrayList<R
         holder.rootView.findViewById<Button>(R.id.save).setOnClickListener {
             val requestBitmap = bitmap
             val requestFaceDescription = holder.rootView.findViewById<EditText>(R.id.description).text
-            ApiService.saveFaceWithName(requestBitmap, requestFaceDescription.toString())
         }
     }
 

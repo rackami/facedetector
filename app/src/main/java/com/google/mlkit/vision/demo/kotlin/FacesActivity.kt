@@ -1,28 +1,26 @@
 package com.google.mlkit.vision.demo.kotlin
 
-import android.R.attr.src
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
 import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.google.mlkit.vision.demo.ApiService
+import com.google.mlkit.vision.demo.BitmapUtils
 import com.google.mlkit.vision.demo.R
 import java.io.FileNotFoundException
 
 
 class FacesActivity : AppCompatActivity() {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var viewAdapter: RecyclerView.Adapter<*>
-    private lateinit var viewManager: RecyclerView.LayoutManager
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_faces)
 
-        supportActionBar?.title = "Faces Detected"
+        supportActionBar?.title = "Face Detected"
 
         val currentIntent = intent
 
@@ -34,17 +32,38 @@ class FacesActivity : AppCompatActivity() {
         }
         val faces = currentIntent.getParcelableArrayListExtra<Rect>("FACE_LIST_TAG")
 
-        viewManager = LinearLayoutManager(this)
-        viewAdapter = FaceAdapter(fullImage, faces)
+        if (faces.isNullOrEmpty().not()) {
+            val face = faces[0]
 
-        recyclerView = findViewById<RecyclerView>(R.id.facesList).apply {
-            setHasFixedSize(true)
-
-            // use a linear layout manager
-            layoutManager = viewManager
-
-            // specify an viewAdapter (see also next example)
-            adapter = viewAdapter
+            var bitmap: Bitmap? = null
+            if (faces.isNullOrEmpty().not()) {
+                bitmap = BitmapUtils.cropBitmap(fullImage, face)
+                findViewById<ImageView>(R.id.faceImage)
+                        .setImageBitmap(bitmap)
+            }
+            findViewById<Button>(R.id.save).setOnClickListener {
+                val requestBitmap = bitmap
+                val requestFaceDescription = findViewById<EditText>(R.id.description).text
+                ApiService.saveFaceWithName(requestBitmap, requestFaceDescription.toString()) { isSuccess ->
+                    runOnUiThread {
+                        if (isSuccess) {
+//                            val intent = Intent(applicationContext, FacesActivity::class.java)
+//                            intent.putExtra(
+//                                    "ggggg",
+//                                    "dddd"
+//                            )
+//                            startActivity(intent)
+                        } else {
+//                            val intent = Intent(applicationContext, FacesActivity::class.java)
+//                            intent.putExtra(
+//                                    "ggggg",
+//                                    "dddd"
+//                            )
+//                            startActivity(intent)
+                        }
+                    }
+                }
+            }
         }
     }
 }

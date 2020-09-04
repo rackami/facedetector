@@ -22,7 +22,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.util.Log
+import android.util.Size
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -281,11 +283,14 @@ class CameraXLivePreviewActivity :
             return
         }
 
+        // Detect the device res
+        val metrics = DisplayMetrics().also { previewView?.display?.getRealMetrics(it) }
+        analysisUseCase = ImageAnalysis.Builder().apply {
+            setTargetResolution(Size(metrics.widthPixels, metrics.heightPixels))
+        }.build()
+
         val builder = ImageAnalysis.Builder()
-//        val targetAnalysisSize = PreferenceUtils.getCameraXTargetAnalysisSize(this)
-//        if (targetAnalysisSize != null) {
-//            builder.setTargetResolution(targetAnalysisSize)
-//        }
+            builder.setTargetResolution(Size(metrics.widthPixels, metrics.heightPixels))
         analysisUseCase = builder.build()
 
         needUpdateGraphicOverlayImageSourceInfo = true

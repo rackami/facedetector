@@ -63,10 +63,16 @@ class FaceDetectorProcessor(context: Context, detectorOptions: FaceDetectorOptio
   }
 
   override fun onSuccess(faces: List<Face>, graphicOverlay: GraphicOverlay) {
-    for (face in faces) {
-      graphicOverlay.add(FaceGraphic(graphicOverlay, face))
+    faces.maxBy { face ->
+      face.boundingBox.let {
+        (it.bottom - it.top) * 2 + (it.right - it.left) * 2
+      }
+    }?.let {
+      this.faces = listOf(it)
+      graphicOverlay.add(FaceGraphic(graphicOverlay, it))
+    } ?: run {
+      this.faces = listOf()
     }
-    this.faces = faces
   }
 
   override fun onFailure(e: Exception) {
